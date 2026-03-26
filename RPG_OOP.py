@@ -1,0 +1,178 @@
+from abc import ABC, abstractmethod
+import random
+from enum import Enum
+
+
+Phrases = {
+"crit" : [
+    f"{self.name} mirou em um ponto vital.", # type: ignore
+    f"{self.name} está com sangue nos olhos.", # type: ignore
+    f"{self.name} não está para brincadeira." # type: ignore
+],
+"yowai" : [
+    f"{self.name} fez carinho em vez de machucar.", # type: ignore
+    f"{self.name} bateu tão fraco que ficou devendo.", # type: ignore
+    f"{self.name} praticamente curou o alvo.", # type: ignore
+    f"{self.name} tem que comer feijão." # type: ignore
+],
+"shinu" : [
+    f"{self.name} foi dormir em um pijama de madeira.", # type: ignore
+    f"{self.name} virou comida de minhoca.", # type: ignore
+    f"{self.name} virou carne moída.", # type: ignore
+    f"{self.name} foi jogar no Vasco.", # type: ignore
+    f"Bem Vindo Ao Gigante {self.name}" # type: ignore
+        ]        ,
+}
+
+class Character(ABC):
+    def __init__(self, name, health, damage, critical, defense):
+        self.name = name
+        self.health = health
+        self.damage = damage
+        self.critical = critical
+        self.defense = defense
+
+    @abstractmethod
+    def attack(self, target):
+        pass
+    
+    def calculate_damage(self, target):
+        damage = self.damage - target.defense
+        if self is target:
+            print(f"{self.name} está atacando a sí mesmo.")
+        
+        if random.random() < self.critical / 100:
+            damage *= 2
+            print(random.choice(Phrases["crit"]))
+
+        if damage < 0:
+            print(random.choice(Phrases["yowai"]))
+            return 0
+        
+        return damage
+
+class NPC(Character):
+    def __init__(self, name, health, damage, critical, defense, drop):
+        super().__init__(name, health, damage, critical, defense)
+        self._drop = drop
+
+    @property
+    def drop(self):
+        return self._drop ##TODO: Sistema de drop de items, vai ser salgado pra fazer.
+
+
+class Basic(NPC):
+    def __init__(self, name, health, damage, critical, defense,drop):
+        super().__init__(name, health, damage, critical, defense, drop)
+
+
+    def attack(self, target):
+        totaldmg = self.calculate_damage(self, target)
+        target.health -= totaldmg
+        print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
+
+
+
+class Player(Character):
+    def __init__(self, name, coins = 0):
+        super().__init__(name, 100, 10, 5, 0)
+        self._coins = coins
+        self._inventory = []
+
+    @property
+    def coins(self):
+        return self._coins
+    
+    
+    def attack(self, target):
+        totaldmg = self.calculate_damage(target)
+        target.health -= totaldmg
+        print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
+
+    def pickup_item(self, item):
+        self._inventory.append(item)
+
+    def drop_item(self, item):
+        self._inventory.remove(item)
+    
+    def use_item(self, item):
+        pass
+            
+            
+## Sistema de Itens
+
+class Rarity(Enum):
+    COMMON = 1
+    RARE = 2
+    EPIC = 3
+    LEGENDARY = 4
+    
+def roll_rarity():
+    roll = random.random()
+    
+    if roll < 0.6:
+        return Rarity.COMMON
+    elif roll < 0.85:
+        return Rarity.RARE
+    elif roll < 0.97:
+        return Rarity.EPIC
+    else:
+        return Rarity.LEGENDARY
+
+item_pool = {
+    Rarity.COMMON: [
+        lambda: Weapon("Palito de dente", 1, 2, Rarity.COMMON),
+        lambda: Weapon("Escova de Ogro", 2, 5, Rarity.COMMON),
+        lambda: Weapon("Espada de Vidro", random.randint(1,5),random.randint(1,5), Rarity.COMMON),
+        lambda: Weapon("Marreta do Chapolin da Shoppee Medieval", 4, 4, Rarity.COMMON),
+        lambda: Armor("Sacola de Mercado Medieval", 1, Rarity.COMMON),
+        lambda: Armor("Toalha de banho", random.randint(1,2), Rarity.COMMON),
+        lambda: Armor("Tronco de Árvore oco", 2, Rarity.COMMON),
+        lambda: Armor("Lata de Lixo", 3, Rarity.COMMON),
+        lambda: Potion("Carniça", -5, Rarity.COMMON),
+        lambda: Potion("Lavagem", -2, Rarity.COMMON),
+        lambda: Potion("Pão seco", random.randint(2,5), Rarity.COMMON),
+        lambda: Potion("Elixir Mata-Pulga", random.randint(3,7), Rarity.COMMON),
+        lambda: Potion("Chop Amanhecido", random.randint(4,7), Rarity.COMMON),
+        lambda: Potion("Poção feita as coxas", random.randint(5,8), Rarity.COMMON),
+        lambda: Potion("Xarope da vó de alguém", random.randint(5,9, Rarity.COMMON)),
+        lambda: Potion("Poção Fraca", random.randint(6,10), Rarity.COMMON)
+        
+    ]
+}
+    
+def generate_loot():
+    rarity = roll_rarity()
+    pool = item_pool[rarity]
+    item_generator = random.choice(pool)
+    
+    return item_generator()
+    
+
+## Classes de items
+
+class Item:
+    def __init__(self, name, rarity):
+        self.name = name
+        self.rarity = rarity
+        
+class Weapon(Item):
+    def __init__(self, name, damage_bonus, crit_rate, rarity):
+        super().__init__(name, rarity)
+        self.damage_bonus = damage_bonus
+        self.crit_rate = crit_rate
+
+class Armor(Item):
+    def __init__(self, name, defense_bonus, rarity):
+        super().__init__(name, rarity)
+        self.defense_bonus = defense_bonus
+
+class Potion(Item):
+    def __init__(self, name, heal, rarity):
+        super().__init__(name, rarity)
+        self.heal = heal
+        
+    def use(self, target):
+        target.health += self.heal
+        if target is not self:
+            print(f"{self.name} curou {target.name}, seu inimigo, só pelo prazer do esporte.")
