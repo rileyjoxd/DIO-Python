@@ -93,9 +93,10 @@ class Basic(NPC):
 class Player(Character):
     def __init__(self, name, coins = 0):
         super().__init__(name, 100, 10, 5, 0)
-        self.weapon = None
-        self._coins = coins
+        self._coins = coins #Mais inutil que buzina em avião.
         self._inventory = []
+        self.weapon = None
+        self.armor = None
         
         
 
@@ -103,28 +104,59 @@ class Player(Character):
     def coins(self):
         return self._coins
     
-    def equip_weapon(self, weapon):
-        self.weapon = weapon
-        print(f"{self.name} equipou {weapon.name}.")
-        
-    def equip_armor(self, armor):
-        self.armor = armor
-        print(f"{self.name} equipou {armor.name}")
-    
+
     def attack(self, target):
         totaldmg = self.calculate_damage(target)
         target.health -= totaldmg
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
-
+        
     def pickup_item(self, item):
         self._inventory.append(item)
+        print(f"{self.name} pegou {item.name}")
+
 
     def drop_item(self, item):
         self._inventory.remove(item)
-    
+        print(f"{self.name} dropou {item.name}.")
+        
     def use_item(self, item):
-        pass
+        if item not in self._inventory:
+            print("Item não está no inventário.")
+        
+        if isinstance(item,Potion):
+            item.use(self)
+            self._inventory.remove(item)
+            print(f"{self.name} usou {item.name}")
+        else:
+            print("Esse item não pode ser usado.")
             
+    def equip_item(self, index):
+        if index < 0 or index >= len(self._inventory):
+            print("Indice inválido.")
+            return
+        
+        item = self._inventory[index]
+        
+        if isinstance(item, Weapon):
+            self.weapon = item
+            print(f"{self.name} equipou a arma {item.name}")
+            
+        elif isinstance(item, Armor):
+            self.armor = item
+            print(f"{self.name} equipou a armadura {item.name}")
+            
+        else:
+            print("Esse item não pode ser equipado.")
+    def show_inventory(self):
+        print("\n Inventário:")
+        
+        for i, item in enumerate(self._inventory):
+            equipped = ""
+            
+            if item == self.weapon or item == self.armor:
+                equipped = " (EQUIPADO)"
+                
+            print(f"{i} - {item.name} ({item.rarity.name}){equipped}")
             
 ## Sistema de Itens
 
@@ -248,6 +280,7 @@ class Potion(Item):
         super().__init__(name, rarity)
         self.heal = heal
         
+        
     def use(self, target):
         target.health += self.heal
         if target is not self:
@@ -257,10 +290,10 @@ class Potion(Item):
 player = Player("Herói")
 enemy = Basic("Goblin", 30, 5, 2, 1, None)
 
-weapon = Weapon("Espada Teste", 5, 50, Rarity.COMMON)
-armor = Armor("Armadura Teste", 3, Rarity.COMMON)
-
-player.equip_weapon(weapon)
-player.equip_armor(armor)
+loot = generate_loot()
+player.pickup_item(loot)
+player.show_inventory()
+player.equip_item(0)
+player.use_item(player._inventory[0])
 
 player.attack(enemy)
