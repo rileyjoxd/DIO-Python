@@ -5,23 +5,23 @@ from enum import Enum
 
 Phrases = {
 "crit" : [
-    f"{self.name} mirou em um ponto vital.", # type: ignore
-    f"{self.name} está com sangue nos olhos.", # type: ignore
-    f"{self.name} não está para brincadeira." # type: ignore
+    f" mirou em um ponto vital.", # type: ignore
+    f" está com sangue nos olhos.", # type: ignore
+    f" não está para brincadeira." # type: ignore
 ],
 "yowai" : [
-    f"{self.name} fez carinho em vez de machucar.", # type: ignore
-    f"{self.name} bateu tão fraco que ficou devendo.", # type: ignore
-    f"{self.name} praticamente curou o alvo.", # type: ignore
-    f"{self.name} tem que comer feijão." # type: ignore
+    f" fez carinho em vez de machucar.", # type: ignore
+    f" bateu tão fraco que ficou devendo.", # type: ignore
+    f" praticamente curou o alvo.", # type: ignore
+    f" tem que comer feijão." # type: ignore
 ],
 "shinu" : [
-    f"{self.name} foi dormir em um pijama de madeira.", # type: ignore
-    f"{self.name} virou comida de minhoca.", # type: ignore
-    f"{self.name} virou carne moída.", # type: ignore
-    f"{self.name} foi jogar no Vasco.", # type: ignore
-    f"Bem Vindo Ao Gigante {self.name}.", # type: ignore
-    f"{self.name} virou protagonista de Isekai." # type: ignore
+    f" foi dormir em um pijama de madeira.", # type: ignore
+    f" virou comida de minhoca.", # type: ignore
+    f" virou carne moída.", # type: ignore
+    f" foi jogar no Vasco.", # type: ignore
+    f", seja bem Vindo Ao Gigante.", # type: ignore
+    f" virou protagonista de Isekai." # type: ignore
         ]        ,
 }
 
@@ -44,10 +44,10 @@ class Character(ABC):
         
         if random.random() < self.critical / 100:
             damage *= 2
-            print(random.choice(Phrases["crit"]))
+            print(f"{self.name}{random.choice(Phrases['crit'])}")
 
         if damage < 0:
-            print(random.choice(Phrases["yowai"]))
+            print(f"{self.name}{random.choice(Phrases['yowai'])}")
             return 0
         
         return damage
@@ -68,7 +68,7 @@ class Basic(NPC):
 
 
     def attack(self, target):
-        totaldmg = self.calculate_damage(self, target)
+        totaldmg = self.calculate_damage(target)
         target.health -= totaldmg
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
 
@@ -137,31 +137,58 @@ item_pool = {
         lambda: Potion("Elixir Mata-Pulga", random.randint(3,7), Rarity.COMMON),
         lambda: Potion("Chop Amanhecido", random.randint(4,7), Rarity.COMMON),
         lambda: Potion("Poção feita as coxas", random.randint(5,8), Rarity.COMMON),
-        lambda: Potion("Xarope da vó de alguém", random.randint(5,9, Rarity.COMMON)),
+        lambda: Potion("Xarope da vó de alguém", random.randint(5,9), Rarity.COMMON),
         lambda: Potion("Poção Fraca", random.randint(6,10), Rarity.COMMON)
         
     ],
     
     Rarity.RARE: [
-        lambda: Weapon("Faca AK-47", 4, 7, Rarity.RARE),
+        lambda: Weapon("Faca AK-47", 4, 10, Rarity.RARE),
         lambda: Weapon("Peixeira", 5, random.randint(5, 7), Rarity.RARE),
         lambda: Weapon("Alabarda", 9, 2, Rarity.RARE),
         lambda: Weapon("Barril de Chop", random.randint(5, 10), random.randint(5, 10), Rarity.RARE),
         lambda: Armor("Roupa de Mago", 5, Rarity.RARE),
         lambda: Armor("Armadura de Couro", 6, Rarity.RARE),
         lambda: Armor("Cota de Malha", 7, Rarity.RARE),
-        lambda: Potion("Poção20", random.randint(1, 20), Rarity.RARE),
+        lambda: Potion("PoçãoD20", random.randint(1, 20), Rarity.RARE),
         lambda: Potion("Velho Escudeiro 910ml 40%", random.randint(15,20), Rarity.RARE),
         lambda: Potion("Suco Limonations", 20, Rarity.RARE),
         lambda: Potion("Poção Mediana", random.randint(20,30), Rarity.RARE),
-        lambda: Potion("Dragon Breath", random.randint(-10,40), Rarity.RARE),
+        lambda: Potion("Dragon Breath", random.randint(-10,40), Rarity.RARE)
     ],
     Rarity.EPIC: [
         lambda: Weapon("Night's Edge", 10, 8, Rarity.EPIC), #🌳
         lambda: Weapon("Marreta do Everson Eyes, o Bárbaro", 11, 5, Rarity.EPIC),
-        lambda: Armor("Armadura do Sol 🙌", 10, Rarity.EPIC), #Praise the Sun
-        lambda: Potion("Litrão de Jester Daniels Fire", random.randint(40-50), Rarity.EPIC),    
+        lambda: Weapon("Cortador de Grama em uma vara", 12, 6, Rarity.EPIC),
+        lambda: Weapon("Excalibur na Pedra", 14, 5, Rarity.EPIC),
+        lambda: Armor("Armadura de Durasteel", 8, Rarity.EPIC),
+        lambda: Armor("Magia de Forcefield", 9, Rarity.EPIC),        
+        lambda: Armor("Armadura do Sol", 10, Rarity.EPIC), #Praise the Sun 🙌
+        lambda: Potion("Poção Boa", random.randint(30, 40), Rarity.EPIC),
+        lambda: Potion ("Poção do Apostador", random.randint(-75, 75), Rarity.EPIC),
+        lambda: Potion("Elixir da Bruxa", random.randint(40, 45), Rarity.EPIC),
+        lambda: Potion("Litrão de Jester Daniels Fire", random.randint(40, 50), Rarity.EPIC),
+        lambda: Potion("Leite de Burra", 50, Rarity.EPIC)    
     ],
+    Rarity.LEGENDARY: [
+        lambda: Weapon("Terrablade",20, 20, Rarity.LEGENDARY), #🌳
+        lambda: Weapon("Dragon Slayer", 22, 10, Rarity.LEGENDARY),
+        lambda: Weapon("Muramasa", 25, 12, Rarity.LEGENDARY),
+        lambda: Weapon("Birch Tree", 30, 15, Rarity.LEGENDARY), #👁️
+        lambda: Weapon("A Lendária Excalibur", 40, 20, Rarity.LEGENDARY),
+        lambda: Weapon("Zenith", 50, 25, Rarity.LEGENDARY), #🌳
+        lambda: Armor("Camiseta do Archlinux", 15, Rarity.LEGENDARY),
+        lambda: Armor("Malha de Nokia", 20, Rarity.LEGENDARY),
+        lambda: Armor("Camiseta de C++", 22, Rarity.LEGENDARY),
+        lambda: Armor("Plot Armor", 25, Rarity.LEGENDARY),
+        lambda: Armor("Camiseta de Assembly", 30, Rarity.LEGENDARY),
+        lambda: Potion("Poção do Chaos", random.randint(-100, 200), Rarity.LEGENDARY),
+        lambda: Potion("Poção Lendária", random.randint(50, 75), Rarity.LEGENDARY),
+        lambda: Potion("PoçãoD100", random.randint(1, 100), Rarity.LEGENDARY),
+        lambda: Potion("Ambrosia", 60, Rarity.LEGENDARY),
+        lambda: Potion("Holy Hand Grenade Defusada", random.randint(70, 100), Rarity.LEGENDARY)
+        
+    ]
 }
     
 def generate_loot():
