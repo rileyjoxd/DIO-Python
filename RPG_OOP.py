@@ -38,17 +38,33 @@ class Character(ABC):
         pass
     
     def calculate_damage(self, target):
-        damage = self.damage - target.defense
+        base_damage = self.damage
+        
+        if hasattr(self, "weapon") and self.weapon:
+            base_damage += self.weapon.damage_bonus
+        
+        defense = target.defense
+        
+        if hasattr(target, "armor") and target.armor:
+            defense+= target.armor.defense_bonus
+        
+        damage = max(0, base_damage - defense)
+        
         if self is target:
             print(f"{self.name} está atacando a sí mesmo.")
         
-        if random.random() < self.critical / 100:
+        total_crit = self.critical
+        if hasattr(self, "weapon") and self.weapon:
+            total_crit += self.weapon.crit_rate
+            
+        total_crit = min(total_crit, 100) #Pra não bugar o calculo, talvez adicione 4x no futuro.
+            
+        if random.random() < total_crit / 100:
             damage *= 2
             print(f"{self.name}{random.choice(Phrases['crit'])}")
 
         if damage < 0:
             print(f"{self.name}{random.choice(Phrases['yowai'])}")
-            return 0
         
         return damage
 
@@ -77,13 +93,23 @@ class Basic(NPC):
 class Player(Character):
     def __init__(self, name, coins = 0):
         super().__init__(name, 100, 10, 5, 0)
+        self.weapon = None
         self._coins = coins
         self._inventory = []
+        
+        
 
     @property
     def coins(self):
         return self._coins
     
+    def equip_weapon(self, weapon):
+        self.weapon = weapon
+        print(f"{self.name} equipou {weapon.name}.")
+        
+    def equip_armor(self, armor):
+        self.armor = armor
+        print(f"{self.name} equipou {armor.name}")
     
     def attack(self, target):
         totaldmg = self.calculate_damage(target)
@@ -226,3 +252,15 @@ class Potion(Item):
         target.health += self.heal
         if target is not self:
             print(f"{self.name} curou {target.name}, seu inimigo, só pelo prazer do esporte.")
+            
+
+player = Player("Herói")
+enemy = Basic("Goblin", 30, 5, 2, 1, None)
+
+weapon = Weapon("Espada Teste", 5, 50, Rarity.COMMON)
+armor = Armor("Armadura Teste", 3, Rarity.COMMON)
+
+player.equip_weapon(weapon)
+player.equip_armor(armor)
+
+player.attack(enemy)
