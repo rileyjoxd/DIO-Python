@@ -20,7 +20,8 @@ Phrases = {
     f"{self.name} virou comida de minhoca.", # type: ignore
     f"{self.name} virou carne moída.", # type: ignore
     f"{self.name} foi jogar no Vasco.", # type: ignore
-    f"Bem Vindo Ao Gigante {self.name}" # type: ignore
+    f"Bem Vindo Ao Gigante {self.name}.", # type: ignore
+    f"{self.name} virou protagonista de Isekai." # type: ignore
         ]        ,
 }
 
@@ -131,6 +132,7 @@ item_pool = {
         lambda: Armor("Lata de Lixo", 3, Rarity.COMMON),
         lambda: Potion("Carniça", -5, Rarity.COMMON),
         lambda: Potion("Lavagem", -2, Rarity.COMMON),
+        lambda: Potion("Cup Noodles", -1, Rarity.COMMON),
         lambda: Potion("Pão seco", random.randint(2,5), Rarity.COMMON),
         lambda: Potion("Elixir Mata-Pulga", random.randint(3,7), Rarity.COMMON),
         lambda: Potion("Chop Amanhecido", random.randint(4,7), Rarity.COMMON),
@@ -138,7 +140,28 @@ item_pool = {
         lambda: Potion("Xarope da vó de alguém", random.randint(5,9, Rarity.COMMON)),
         lambda: Potion("Poção Fraca", random.randint(6,10), Rarity.COMMON)
         
-    ]
+    ],
+    
+    Rarity.RARE: [
+        lambda: Weapon("Faca AK-47", 4, 7, Rarity.RARE),
+        lambda: Weapon("Peixeira", 5, random.randint(5, 7), Rarity.RARE),
+        lambda: Weapon("Alabarda", 9, 2, Rarity.RARE),
+        lambda: Weapon("Barril de Chop", random.randint(5, 10), random.randint(5, 10), Rarity.RARE),
+        lambda: Armor("Roupa de Mago", 5, Rarity.RARE),
+        lambda: Armor("Armadura de Couro", 6, Rarity.RARE),
+        lambda: Armor("Cota de Malha", 7, Rarity.RARE),
+        lambda: Potion("Poção20", random.randint(1, 20), Rarity.RARE),
+        lambda: Potion("Velho Escudeiro 910ml 40%", random.randint(15,20), Rarity.RARE),
+        lambda: Potion("Suco Limonations", 20, Rarity.RARE),
+        lambda: Potion("Poção Mediana", random.randint(20,30), Rarity.RARE),
+        lambda: Potion("Dragon Breath", random.randint(-10,40), Rarity.RARE),
+    ],
+    Rarity.EPIC: [
+        lambda: Weapon("Night's Edge", 10, 8, Rarity.EPIC), #🌳
+        lambda: Weapon("Marreta do Everson Eyes, o Bárbaro", 11, 5, Rarity.EPIC),
+        lambda: Armor("Armadura do Sol 🙌", 10, Rarity.EPIC), #Praise the Sun
+        lambda: Potion("Litrão de Jester Daniels Fire", random.randint(40-50), Rarity.EPIC),    
+    ],
 }
     
 def generate_loot():
