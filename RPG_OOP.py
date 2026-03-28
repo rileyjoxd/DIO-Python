@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import random
 from enum import Enum
 
+#Metade do código está em ingles porque estou acostumado a programar em inglês, o jogo assim deve estar em portugues, tirando algumas referências.
 
 Phrases = {
 "crit" : [
@@ -108,12 +109,13 @@ class Basic(NPC):
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
 
 class Player(Character):
-    def __init__(self, name, coins = 0):
+    def __init__(self, name, coins = 0, ):
         super().__init__(name, 100, 10, 5, 0)
         self._coins = coins #Mais inutil que buzina em avião.
         self._inventory = []
         self.weapon = None
         self.armor = None
+        self.level = 1
         
         
 
@@ -330,17 +332,38 @@ class Potion(Item):
 player = Player("Herói")
 enemy = Basic(
     "Goblin Elite",
-    50, 8, 5, 3,
+    5, 8, 5, 3,
     fixed_drop=[
         lambda: Weapon("Adaga do Goblin", 4, 3, Rarity.COMMON)
     ],
     random_drop=True
 )
 
-loot = generate_loot()
+#Funções e companhia.
+
+def create_enemy(player_level):
+    scale = player_level
+    
+    health = random.randint(20 + scale*5, 30 + scale*8)
+    damage = random.randint(5 + scale*2, 8 + scale*3)
+    defense = random.randint(1 + scale, 3 + scale*2)
+    critical = random.randint(2, 5 + scale)
+    
+    return Basic(
+        name=random.choice(["Goblin", "Bandido", "Esqueleto"]),
+        health=health,
+        damage=damage,
+        critical=critical,
+        defense=defense
+    )
+'''loot = generate_loot()
 player.pickup_item(loot)
 player.show_inventory()
 player.equip_item(0)
 player.use_item(player._inventory[0])
-player.show_inventory()
 player.attack(enemy)
+player.equip_item(1)
+player.equip_item(2)
+player.show_inventory()''' #Código para testar os métodos, etc....
+
+##TODO: Criar inimigos, fazer eles poderem usar itens(Não obrigatório), ajeitar a linha 353.
