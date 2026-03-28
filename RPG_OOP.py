@@ -122,13 +122,13 @@ class Player(Character):
     def use_item(self, item):
         if item not in self._inventory:
             print("Item não está no inventário.")
+            return
         
         if isinstance(item,Potion):
-            item.use(self)
+            item.use(self, self) #Bem intuitivo 😂 O primeiro self é o item, o segundo é quem usou.
             self._inventory.remove(item)
-            print(f"{self.name} usou {item.name}")
         else:
-            print("Esse item não pode ser usado.")
+            print("Esse item não pode ser bebido.")
             
     def equip_item(self, index):
         if index < 0 or index >= len(self._inventory):
@@ -190,7 +190,7 @@ item_pool = {
         lambda: Armor("Lata de Lixo", 3, Rarity.COMMON),
         lambda: Potion("Carniça", -5, Rarity.COMMON),
         lambda: Potion("Lavagem", -2, Rarity.COMMON),
-        lambda: Potion("Cup Noodles", -1, Rarity.COMMON),
+        lambda: Potion("Caldo de Cup Noodles", -1, Rarity.COMMON),
         lambda: Potion("Pão seco", random.randint(2,5), Rarity.COMMON),
         lambda: Potion("Elixir Mata-Pulga", random.randint(3,7), Rarity.COMMON),
         lambda: Potion("Chop Amanhecido", random.randint(4,7), Rarity.COMMON),
@@ -281,12 +281,14 @@ class Potion(Item):
         self.heal = heal
         
         
-    def use(self, target):
+    def use(self, user, target):
         target.health += self.heal
-        if target is not self:
-            print(f"{self.name} curou {target.name}, seu inimigo, só pelo prazer do esporte.")
-            
-
+        if user != target:
+            print(f"{self.name} forçou {target.name} a beber {self.name}, seu inimigo, só pelo prazer do esporte.")
+        elif self.heal >= 0:
+            print(f"{user.name} bebeu {self.name}, o que lhe acrescentou {self.heal} de vida, resultando em {target.health}")            
+        else:
+            print(f"{user.name} bebeu {self.name}, o que lhe tirou {-(self.heal)} de vida, resultando em {target.health}, não foi a melhor idéia.")            
 player = Player("Herói")
 enemy = Basic("Goblin", 30, 5, 2, 1, None)
 
