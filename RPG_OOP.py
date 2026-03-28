@@ -5,23 +5,21 @@ from enum import Enum
 
 Phrases = {
 "crit" : [
-    f" mirou em um ponto vital.", # type: ignore
-    f" está com sangue nos olhos.", # type: ignore
-    f" não está para brincadeira." # type: ignore
+    f" mirou em um ponto vital.",
+    f" está com sangue nos olhos.",
+    f" não está para brincadeira."
 ],
 "yowai" : [
-    f" fez carinho em vez de machucar.", # type: ignore
-    f" bateu tão fraco que ficou devendo.", # type: ignore
-    f" praticamente curou o alvo.", # type: ignore
-    f" tem que comer feijão." # type: ignore
+    f" fez carinho em vez de machucar.",
+    f" bateu tão fraco que ficou devendo.",
+    f" tem que comer feijão."
 ],
 "shinu" : [
-    f" foi dormir em um pijama de madeira.", # type: ignore
-    f" virou comida de minhoca.", # type: ignore
-    f" virou carne moída.", # type: ignore
-    f" foi jogar no Vasco.", # type: ignore
-    f", seja bem Vindo Ao Gigante.", # type: ignore
-    f" virou protagonista de Isekai." # type: ignore
+    f" foi dormir em um pijama de madeira.",
+    f" virou carne moída.",
+    f" foi jogar no Vasco.",
+    f", seja bem Vindo Ao Gigante.",
+    f" virou protagonista de Isekai."
         ]        ,
 }
 
@@ -36,6 +34,15 @@ class Character(ABC):
     @abstractmethod
     def attack(self, target):
         pass
+    
+    def take_damage(self, amount):
+        self.health -= amount
+        
+        if self.health <= 0: 
+            self.health = 0
+            print(f"{self.name}{random.choice(Phrases['shinu'])}")
+            return True 
+        return False
     
     def calculate_damage(self, target):
         base_damage = self.damage
@@ -69,26 +76,36 @@ class Character(ABC):
         return damage
 
 class NPC(Character):
-    def __init__(self, name, health, damage, critical, defense, drop):
-        super().__init__(name, health, damage, critical, defense)
-        self._drop = drop
+    def __init__(self, name, health, damage, critical, defense, fixed_drop=None, random_drop=True):
+        
+        super().__init__(name, health, damage, critical, defense,)
+        
+        self.fixed_drop = fixed_drop or []
+        self.random_drop = random_drop
 
-    @property
-    def drop(self):
-        return self._drop ##TODO: Sistema de drop de items, vai ser salgado pra fazer.
+    def generate_drops(self):
+        loots = []
 
+        # 🎯 1. Drops fixos (sempre acontecem)
+        for generator in self.fixed_drop:
+            loots.append(generator())
+
+        # 🎲 2. Drops aleatórios (da pool global)
+        if self.random_drop:
+            num_drops = random.randint(1, 2)
+            for _ in range(num_drops):
+                loots.append(generate_loot())
+
+        return loots
 
 class Basic(NPC):
-    def __init__(self, name, health, damage, critical, defense,drop):
-        super().__init__(name, health, damage, critical, defense, drop)
-
+    def __init__(self, name, health, damage, critical, defense, fixed_drop=None, random_drop=True):
+        super().__init__(name, health, damage, critical, defense, fixed_drop=fixed_drop, random_drop=random_drop)
 
     def attack(self, target):
         totaldmg = self.calculate_damage(target)
-        target.health -= totaldmg
+        died = target.take_damage(totaldmg)
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
-
-
 
 class Player(Character):
     def __init__(self, name, coins = 0):
@@ -107,9 +124,30 @@ class Player(Character):
 
     def attack(self, target):
         totaldmg = self.calculate_damage(target)
-        target.health -= totaldmg
+        died = target.take_damage(totaldmg)
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
-        
+        if died and isinstance(target, NPC):
+            loots = target.generate_drops()
+
+            print(f"{target.name} dropou:")
+
+            for item in loots:
+                print(f"- {item.name}")
+
+            for item in loots:
+                while True:
+                    choice = input(f"Deseja pegar {item.name}? (s/n): ").lower()
+
+                    if choice in ["s", "sim"]:
+                        self.pickup_item(item)
+                        break
+                    elif choice in ["n", "nao", "não"]:
+                        print(f"{self.name} deixou {item.name}.")
+                        break
+                    else:
+                        print("Digite 's' ou 'n'.")
+
+
     def pickup_item(self, item):
         self._inventory.append(item)
         print(f"{self.name} pegou {item.name}")
@@ -119,7 +157,7 @@ class Player(Character):
         self._inventory.remove(item)
         print(f"{self.name} dropou {item.name}.")
         
-    def use_item(self, item):
+    def use_item(self, item): #Vou deixar 2 métodos de use diferentes, hack fedorento para no caso for criar outros itens que não sejam Potions.
         if item not in self._inventory:
             print("Item não está no inventário.")
             return
@@ -139,16 +177,16 @@ class Player(Character):
         
         if isinstance(item, Weapon):
             self.weapon = item
-            print(f"{self.name} equipou a arma {item.name}")
+            print(f"{self.name} agora usa {item.name} como arma.")
             
         elif isinstance(item, Armor):
             self.armor = item
-            print(f"{self.name} equipou a armadura {item.name}")
+            print(f"{self.name} equipou {item.name}.")
             
         else:
             print("Esse item não pode ser equipado.")
     def show_inventory(self):
-        print("\n Inventário:")
+        print("Inventário:")
         
         for i, item in enumerate(self._inventory):
             equipped = ""
@@ -188,7 +226,7 @@ item_pool = {
         lambda: Armor("Toalha de banho", random.randint(1,2), Rarity.COMMON),
         lambda: Armor("Tronco de Árvore oco", 2, Rarity.COMMON),
         lambda: Armor("Lata de Lixo", 3, Rarity.COMMON),
-        lambda: Potion("Carniça", -5, Rarity.COMMON),
+        lambda: Potion("Suco de Carniça", -5, Rarity.COMMON),
         lambda: Potion("Lavagem", -2, Rarity.COMMON),
         lambda: Potion("Caldo de Cup Noodles", -1, Rarity.COMMON),
         lambda: Potion("Pão seco", random.randint(2,5), Rarity.COMMON),
@@ -220,7 +258,7 @@ item_pool = {
         lambda: Weapon("Cortador de Grama em uma vara", 12, 6, Rarity.EPIC),
         lambda: Weapon("Excalibur na Pedra", 14, 5, Rarity.EPIC),
         lambda: Armor("Armadura de Durasteel", 8, Rarity.EPIC),
-        lambda: Armor("Magia de Forcefield", 9, Rarity.EPIC),        
+        lambda: Armor("Armadura Mágica", 9, Rarity.EPIC),        
         lambda: Armor("Armadura do Sol", 10, Rarity.EPIC), #Praise the Sun 🙌
         lambda: Potion("Poção Boa", random.randint(30, 40), Rarity.EPIC),
         lambda: Potion ("Poção do Apostador", random.randint(-75, 75), Rarity.EPIC),
@@ -286,16 +324,23 @@ class Potion(Item):
         if user != target:
             print(f"{self.name} forçou {target.name} a beber {self.name}, seu inimigo, só pelo prazer do esporte.")
         elif self.heal >= 0:
-            print(f"{user.name} bebeu {self.name}, o que lhe acrescentou {self.heal} de vida, resultando em {target.health}")            
+            print(f"{user.name} bebeu {self.name}, o que lhe acrescentou {self.heal} de vida, e lhe deixou com {target.health}.")            
         else:
-            print(f"{user.name} bebeu {self.name}, o que lhe tirou {-(self.heal)} de vida, resultando em {target.health}, não foi a melhor idéia.")            
+            print(f"{user.name} bebeu {self.name}, o que lhe tirou {-(self.heal)} de vida, e lhe deixou com {target.health} de vida, não foi a melhor idéia.")            
 player = Player("Herói")
-enemy = Basic("Goblin", 30, 5, 2, 1, None)
+enemy = Basic(
+    "Goblin Elite",
+    50, 8, 5, 3,
+    fixed_drop=[
+        lambda: Weapon("Adaga do Goblin", 4, 3, Rarity.COMMON)
+    ],
+    random_drop=True
+)
 
 loot = generate_loot()
 player.pickup_item(loot)
 player.show_inventory()
 player.equip_item(0)
 player.use_item(player._inventory[0])
-
+player.show_inventory()
 player.attack(enemy)
