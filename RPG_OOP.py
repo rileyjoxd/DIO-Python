@@ -197,6 +197,14 @@ class Player(Character):
                 equipped = " (EQUIPADO)"
                 
             print(f"{i} - {item.name} ({item.rarity.name}){equipped}")
+  
+## Classes de inimigos            
+class Goblin(NPC):
+    def __init__(self,**kwargs):
+        super().__init__(self,**kwargs)
+        self.fixed_drop=[
+        lambda: Weapon("Adaga do Goblin", 4, 3, Rarity.COMMON) #Incompleto, tem que testar
+    ]           
             
 ## Sistema de Itens
 
