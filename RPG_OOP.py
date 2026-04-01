@@ -71,7 +71,7 @@ class Character(ABC):
             damage *= 2
             print(f"{self.name}{random.choice(Phrases['crit'])}")
 
-        if damage < 0:
+        if damage <= 0:
             print(f"{self.name}{random.choice(Phrases['yowai'])}")
         
         return damage
@@ -240,6 +240,8 @@ class Basic(NPC):
     def attack(self, target):
         totaldmg = self.calculate_damage(target)
         died = target.take_damage(totaldmg)
+        if totaldmg <= 0:
+            print(random.choice(Phrases.get()))
         print(f"{self.name} deu {totaldmg} de dano em {target.name}.")
 
 class Player(Character):
