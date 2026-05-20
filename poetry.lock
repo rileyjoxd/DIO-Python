@@ -111,7 +111,7 @@ files = [
 ]
 
 [package.dependencies]
-aiosqlite = {version = "*", optional = true, markers = "extra == \"aiosqlite\""}
+aiosqlite = {version = "*", optional = true, markers = "extra == \"sqlite\""}
 sqlalchemy = ">=2.0.7"
 
 [package.extras]
@@ -1836,4 +1836,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14"
-content-hash = "046c9423ec89a18457461ff3666af66959905b8a4960936f651ade627397aa2f"
+content-hash = "081820dd0495f5bc7548d72dcbf749128925a0c388bd6559e107e635c9aa9eee"
